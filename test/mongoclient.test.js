@@ -36,21 +36,21 @@ describe('MongoClient', function() {
     describe('id', function() {
         it('should allow custom _id values', function(done) {
             class School extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = String;
                 }
             }
 
-            var school = School.create();
+            var school = School.create(database);
             school._id = new ObjectId('1234567890abcdef12345678');
             school.name = 'Springfield Elementary';
 
             school.save().then(function() {
                 validateId(school);
                 expect(school._id.toString()).to.be.equal('1234567890abcdef12345678');
-                return School.findOne();
+                return School.findOne(database);
             }).then(function(s) {
                 validateId(s);
                 expect(s._id.toString()).to.be.equal('1234567890abcdef12345678');
@@ -60,8 +60,8 @@ describe('MongoClient', function() {
 
     describe('query', function() {
         class User extends Document {
-            constructor() {
-                super();
+            constructor(DB) {
+                super(DB);
                 this.firstName = String;
                 this.lastName = String;
             }
@@ -73,7 +73,7 @@ describe('MongoClient', function() {
          * successfully cast.
          */
         it('should automatically cast string ID in query to ObjectID', function(done) {
-            var user = User.create();
+            var user = User.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
 
@@ -81,7 +81,7 @@ describe('MongoClient', function() {
                 validateId(user);
 
                 var id = String(user._id);
-                return User.findOne({_id: id});
+                return User.findOne(database, {_id: id});
             }).then(function(u) {
                 validateId(u);
             }).then(done, done);
@@ -92,14 +92,14 @@ describe('MongoClient', function() {
          * where user actually passes an ObjectId
          */
         it('should automatically cast string ID in query to ObjectID', function(done) {
-            var user = User.create();
+            var user = User.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
 
             user.save().then(function() {
                 validateId(user);
 
-                return User.findOne({_id: user._id});
+                return User.findOne(database, {_id: user._id});
             }).then(function(u) {
                 validateId(u);
             }).then(done, done);
@@ -110,15 +110,15 @@ describe('MongoClient', function() {
          * queries. In this case we try it with '$in'.
          */
         it('should automatically cast string IDs in \'$in\' operator to ObjectIDs', function(done) {
-            var user1 = User.create();
+            var user1 = User.create(database);
             user1.firstName = 'Billy';
             user1.lastName = 'Bob';
 
-            var user2 = User.create();
+            var user2 = User.create(database);
             user2.firstName = 'Jenny';
             user2.lastName = 'Jane';
 
-            var user3 = User.create();
+            var user3 = User.create(database);
             user3.firstName = 'Danny';
             user3.lastName = 'David';
 
@@ -128,7 +128,7 @@ describe('MongoClient', function() {
 
                 var id1 = String(user1._id);
                 var id3 = String(user3._id);
-                return User.find({ _id: { '$in': [ id1, id3 ] } });
+                return User.find(database, { _id: { '$in': [ id1, id3 ] } });
             }).then(function(users) {
                 expect(users).to.have.length(2);
 
@@ -141,15 +141,15 @@ describe('MongoClient', function() {
         });
 
         it('should automatically cast string IDs in deep query objects', function(done) {
-            var user1 = User.create();
+            var user1 = User.create(database);
             user1.firstName = 'Billy';
             user1.lastName = 'Bob';
 
-            var user2 = User.create();
+            var user2 = User.create(database);
             user2.firstName = 'Jenny';
             user2.lastName = 'Jane';
 
-            var user3 = User.create();
+            var user3 = User.create(database);
             user3.firstName = 'Danny';
             user3.lastName = 'David';
 
@@ -159,7 +159,7 @@ describe('MongoClient', function() {
 
                 var id1 = String(user1._id);
                 var id3 = String(user3._id);
-                return User.find({ $or: [ {_id: id1 }, {_id: id3 } ] });
+                return User.find(database, { $or: [ {_id: id1 }, {_id: id3 } ] });
             }).then(function(users) {
                 expect(users).to.have.length(2);
 
@@ -175,8 +175,8 @@ describe('MongoClient', function() {
     describe('indexes', function() {
         it('should reject documents with duplicate values in unique-indexed fields', function(done) {
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.schema({
                         name: String,
@@ -188,11 +188,11 @@ describe('MongoClient', function() {
                 }
             }
 
-            var user1 = User.create();
+            var user1 = User.create(database);
             user1.name = 'Bill';
             user1.email = 'billy@example.com';
 
-            var user2 = User.create();
+            var user2 = User.create(database);
             user1.name = 'Billy';
             user2.email = 'billy@example.com';
 
@@ -205,8 +205,8 @@ describe('MongoClient', function() {
 
         it('should accept documents with duplicate values in non-unique-indexed fields', function(done) {
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.schema({
                         name: String,
@@ -218,11 +218,11 @@ describe('MongoClient', function() {
                 }
             }
 
-            var user1 = User.create();
+            var user1 = User.create(database);
             user1.name = 'Bill';
             user1.email = 'billy@example.com';
 
-            var user2 = User.create();
+            var user2 = User.create(database);
             user1.name = 'Billy';
             user2.email = 'billy@example.com';
 

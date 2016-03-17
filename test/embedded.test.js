@@ -45,28 +45,28 @@ describe('Embedded', function() {
         it('should not have an _id', function(done) {
 
             class EmbeddedModel extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.str = String;
                 }
             }
 
             class DocumentModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.mod = EmbeddedModel;
                     this.num = { type: Number };
                 }
             }
 
-            var data = DocumentModel.create();
-            data.mod = EmbeddedModel.create();
+            var data = DocumentModel.create(database);
+            data.mod = EmbeddedModel.create(database);
             data.mod.str = 'some data';
             data.num = 1;
 
             data.save().then(function() {
                 expect(data.mod._id).to.be.undefined;
-                return DocumentModel.findOne({ num: 1 });
+                return DocumentModel.findOne(database, { num: 1 });
             }).then(function(d) {
                 expect(d.mod._id).to.be.undefined;
             }).then(done, done);
@@ -77,28 +77,28 @@ describe('Embedded', function() {
         it('should allow embedded types', function(done) {
 
             class EmbeddedModel extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.str = String;
                 }
             }
 
             class DocumentModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.mod = EmbeddedModel;
                     this.num = { type: Number };
                 }
             }
 
-            var data = DocumentModel.create();
-            data.mod = EmbeddedModel.create();
+            var data = DocumentModel.create(database);
+            data.mod = EmbeddedModel.create(database);
             data.mod.str = 'some data';
             data.num = 1;
 
             data.save().then(function() {
                 validateId(data);
-                return DocumentModel.findOne({ num: 1 });
+                return DocumentModel.findOne(database, { num: 1 });
             }).then(function(d) {
                 validateId(d);
                 expect(d.num).to.be.equal(1);
@@ -111,15 +111,15 @@ describe('Embedded', function() {
     it('should allow array of embedded types', function(done) {
 
             class Limb extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.type = String;
                 }
             }
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.limbs = [Limb];
                     this.name = String;
                 }
@@ -129,21 +129,21 @@ describe('Embedded', function() {
                 }
             }
 
-            var person = Person.create();
+            var person = Person.create(database);
             person.name = 'Scott';
-            person.limbs.push(Limb.create());
+            person.limbs.push(Limb.create(database));
             person.limbs[0].type = 'left arm';
-            person.limbs.push(Limb.create());
+            person.limbs.push(Limb.create(database));
             person.limbs[1].type = 'right arm';
-            person.limbs.push(Limb.create());
+            person.limbs.push(Limb.create(database));
             person.limbs[2].type = 'left leg';
-            person.limbs.push(Limb.create());
+            person.limbs.push(Limb.create(database));
             person.limbs[3].type = 'right leg';
 
             person.save().then(function() {
                 validateId(person);
                 expect(person.limbs).to.have.length(4);
-                return Person.findOne({ name: 'Scott' });
+                return Person.findOne(database, { name: 'Scott' });
             }).then(function(p) {
                 validateId(p);
                 expect(p.name).to.be.equal('Scott');
@@ -158,32 +158,32 @@ describe('Embedded', function() {
 
         it('should save nested array of embeddeds', function(done) {
             class Point extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.x = Number;
                     this.y = Number;
                 }
             }
 
             class Polygon extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.points = [Point];
                 }
             }
 
             class WorldMap extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.polygons = [Polygon];
                 }
             }
 
-            var map = WorldMap.create();
-            var polygon1 = Polygon.create();
-            var polygon2 = Polygon.create();
-            var point1 = Point.create({ x: 123.45, y: 678.90 });
-            var point2 = Point.create({ x: 543.21, y: 987.60 });
+            var map = WorldMap.create(database);
+            var polygon1 = Polygon.create(database);
+            var polygon2 = Polygon.create(database);
+            var point1 = Point.create(database, { x: 123.45, y: 678.90 });
+            var point2 = Point.create(database, { x: 543.21, y: 987.60 });
 
             map.polygons.push(polygon1);
             map.polygons.push(polygon2);
@@ -191,7 +191,7 @@ describe('Embedded', function() {
             polygon2.points.push(point2);
 
             map.save().then(function() {
-                return WorldMap.findOne();
+                return WorldMap.findOne(database);
             }).then(function(m) {
                 expect(m.polygons).to.have.length(2);
                 expect(m.polygons[0]).to.be.instanceof(Polygon);
@@ -205,22 +205,22 @@ describe('Embedded', function() {
         it('should allow nested initialization of embedded types', function(done) {
 
             class Discount extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.authorized = Boolean;
                     this.amount = Number;
                 }
             }
 
             class Product extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.discount = Discount;
                 }
             }
 
-            var product = Product.create({
+            var product = Product.create(database, {
                 name: 'bike',
                 discount: {
                     authorized: true,
@@ -241,22 +241,22 @@ describe('Embedded', function() {
         it('should allow initialization of array of embedded documents', function(done) {
 
             class Discount extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.authorized = Boolean;
                     this.amount = Number;
                 }
             }
 
             class Product extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.discounts = [Discount];
                 }
             }
 
-            var product = Product.create({
+            var product = Product.create(database, {
                 name: 'bike',
                 discounts: [{
                     authorized: true,
@@ -286,27 +286,27 @@ describe('Embedded', function() {
         it('should assign defaults to embedded types', function(done) {
 
             class EmbeddedModel extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.str = { type: String, default: 'hello' };
                 }
             }
 
             class DocumentModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.emb = EmbeddedModel;
                     this.num = { type: Number };
                 }
             }
 
-            var data = DocumentModel.create();
-            data.emb = EmbeddedModel.create();
+            var data = DocumentModel.create(database);
+            data.emb = EmbeddedModel.create(database);
             data.num = 1;
 
             data.save().then(function() {
                 validateId(data);
-                return DocumentModel.findOne({ num: 1 });
+                return DocumentModel.findOne(database, { num: 1 });
             }).then(function(d) {
                 validateId(d);
                 expect(d.emb.str).to.be.equal('hello');
@@ -316,29 +316,29 @@ describe('Embedded', function() {
         it('should assign defaults to array of embedded types', function(done) {
 
             class Money extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.value = { type: Number, default: 100 };
                 }
             }
 
             class Wallet extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.contents = [Money];
                     this.owner = String;
                 }
             }
 
-            var wallet = Wallet.create();
+            var wallet = Wallet.create(database);
             wallet.owner = 'Scott';
-            wallet.contents.push(Money.create());
-            wallet.contents.push(Money.create());
-            wallet.contents.push(Money.create());
+            wallet.contents.push(Money.create(database));
+            wallet.contents.push(Money.create(database));
+            wallet.contents.push(Money.create(database));
 
             wallet.save().then(function() {
                 validateId(wallet);
-                return Wallet.findOne({ owner: 'Scott' });
+                return Wallet.findOne(database, { owner: 'Scott' });
             }).then(function(w) {
                 validateId(w);
                 expect(w.owner).to.be.equal('Scott');
@@ -354,21 +354,21 @@ describe('Embedded', function() {
         it('should validate embedded values', function(done) {
 
             class EmbeddedModel extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.num = { type: Number, max: 10 };
                 }
             }
 
             class DocumentModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.emb = EmbeddedModel;
                 }
             }
 
-            var data = DocumentModel.create();
-            data.emb = EmbeddedModel.create();
+            var data = DocumentModel.create(database);
+            data.emb = EmbeddedModel.create(database);
             data.emb.num = 26;
 
             data.save().then(function() {
@@ -382,23 +382,23 @@ describe('Embedded', function() {
         it('should validate array of embedded values', function(done) {
 
             class Money extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.value = { type: Number, choices: [1, 5, 10, 20, 50, 100] };
                 }
             }
 
             class Wallet extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.contents = [Money];
                 }
             }
 
-            var wallet = Wallet.create();
-            wallet.contents.push(Money.create());
+            var wallet = Wallet.create(database);
+            wallet.contents.push(Money.create(database));
             wallet.contents[0].value = 5;
-            wallet.contents.push(Money.create());
+            wallet.contents.push(Money.create(database));
             wallet.contents[1].value = 26;
 
             wallet.save().then(function() {
@@ -414,8 +414,8 @@ describe('Embedded', function() {
     describe('canonicalize', function() {
         it('should ensure timestamp dates are converted to Date objects', function(done) {
             class Education extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.school = String;
                     this.major = String;
@@ -428,8 +428,8 @@ describe('Embedded', function() {
             }
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.gradSchool = Education;
                 }
@@ -441,7 +441,7 @@ describe('Embedded', function() {
 
             var now = new Date();
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 gradSchool: {
                     school: 'CMU',
                     major: 'ECE',
@@ -474,8 +474,8 @@ describe('Embedded', function() {
             var postDeleteCalled = false;
 
             class Coffee extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
 
                 preValidate() {
@@ -504,15 +504,15 @@ describe('Embedded', function() {
             }
 
             class Cup extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.contents = Coffee;
                 }
             }
 
-            var cup = Cup.create();
-            cup.contents = Coffee.create();
+            var cup = Cup.create(database);
+            cup.contents = Coffee.create(database);
 
             cup.save().then(function() {
                 validateId(cup);
@@ -547,8 +547,8 @@ describe('Embedded', function() {
             var postDeleteCalled = false;
 
             class Money extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
 
                 preValidate() {
@@ -577,16 +577,16 @@ describe('Embedded', function() {
             }
 
             class Wallet extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.contents = [Money];
                 }
             }
 
-            var wallet = Wallet.create();
-            wallet.contents.push(Money.create());
-            wallet.contents.push(Money.create());
+            var wallet = Wallet.create(database);
+            wallet.contents.push(Money.create(database));
+            wallet.contents.push(Money.create(database));
 
             wallet.save().then(function() {
                 validateId(wallet);
@@ -614,8 +614,8 @@ describe('Embedded', function() {
     describe('serialize', function() {
         it('should serialize data to JSON', function(done) {
             class Address extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.street = String;
                     this.city = String;
@@ -625,8 +625,8 @@ describe('Embedded', function() {
             }
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = String;
                     this.age = Number;
@@ -640,7 +640,7 @@ describe('Embedded', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Scott',
                 address: {
                     street: '123 Fake St.',

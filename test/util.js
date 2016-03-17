@@ -9,8 +9,8 @@ exports.validateId = function(obj) {
     expect(obj._id.toString()).to.have.length.of.at.least(1);
 };
 
-exports.data1 = function() {
-    var data = Data.create();
+exports.data1 = function(DB) {
+    var data = Data.create(DB);
     data.number = 1;
     data.source = 'arstechnica';
     data.item = 99;
@@ -27,8 +27,8 @@ exports.validateData1 = function(d) {
     expect(d.date.valueOf()).to.be.equal(1434304033241);
 };
 
-exports.data2 = function() {
-    var data = Data.create();
+exports.data2 = function(DB) {
+    var data = Data.create(DB);
     data.number = 2;
     data.source = 'reddit';
     data.item = 26;

@@ -46,14 +46,14 @@ describe('Document', function() {
         it('should allow creation of instance', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.firstName = String;
                     this.lastName = String;
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
 
@@ -65,8 +65,8 @@ describe('Document', function() {
         it('should allow schema declaration via method', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.schema({
                         firstName: String,
@@ -75,7 +75,7 @@ describe('Document', function() {
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
 
@@ -87,15 +87,15 @@ describe('Document', function() {
         it('should allow creation of instance with data', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.firstName = String;
                     this.lastName = String;
                     this.nicknames = [String];
                 }
             }
 
-            var user = User.create({
+            var user = User.create(database, {
                 firstName: 'Billy',
                 lastName: 'Bob',
                 nicknames: ['Bill', 'William', 'Will']
@@ -114,24 +114,24 @@ describe('Document', function() {
         it('should allow creation of instance with references', function(done) {
 
             class Coffee extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.temp = Number;
                 }
             }
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.drinks = [Coffee];
                 }
             }
 
-            var coffee = Coffee.create();
+            var coffee = Coffee.create(database);
             coffee.temp = 105;
 
             coffee.save().then(function() {
-                var user = User.create({ drinks: [coffee] });
+                var user = User.create(database, { drinks: [coffee] });
                 expect(user.drinks).to.have.length(1);
             }).then(done, done);
         });
@@ -141,8 +141,8 @@ describe('Document', function() {
         it('should allow use of member variables in getters', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.firstName = String;
                     this.lastName = String;
                 }
@@ -152,7 +152,7 @@ describe('Document', function() {
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
 
@@ -165,8 +165,8 @@ describe('Document', function() {
         it('should allow use of member variables in setters', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.firstName = String;
                     this.lastName = String;
                 }
@@ -182,7 +182,7 @@ describe('Document', function() {
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
             user.fullName = 'Billy Bob';
 
             user.save().then(function() {
@@ -195,8 +195,8 @@ describe('Document', function() {
         it('should allow use of member variables in methods', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.firstName = String;
                     this.lastName = String;
                 }
@@ -206,7 +206,7 @@ describe('Document', function() {
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
 
@@ -227,13 +227,13 @@ describe('Document', function() {
             }
 
             class ProUser extends User {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.paymentMethod = String;
                 }
             }
 
-            var user = ProUser.create();
+            var user = ProUser.create(database);
             user.firstName = 'Billy';
             user.lastName = 'Bob';
             user.paymentMethod = 'cash';
@@ -259,8 +259,8 @@ describe('Document', function() {
             }
 
             class Motorcycle extends Vehicle {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.numWheels = {
                         type: Number,
                         default: 2
@@ -268,7 +268,7 @@ describe('Document', function() {
                 }
             }
 
-            var bike = Motorcycle.create();
+            var bike = Motorcycle.create(database);
 
             bike.save().then(function() {
                 validateId(bike);
@@ -279,12 +279,12 @@ describe('Document', function() {
         it('should provide default collection name based on class name', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
 
             expect(user.collectionName()).to.be.equal('users');
             expect(User.collectionName()).to.be.equal('users');
@@ -295,18 +295,18 @@ describe('Document', function() {
         it('should provide default collection name based on subclass name', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
             }
 
             class ProUser extends User {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
             }
 
-            var pro = ProUser.create();
+            var pro = ProUser.create(database);
 
             expect(pro.collectionName()).to.be.equal('prousers');
             expect(ProUser.collectionName()).to.be.equal('prousers');
@@ -317,8 +317,8 @@ describe('Document', function() {
         it('should allow custom collection name', function(done) {
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
 
                 static collectionName() {
@@ -326,7 +326,7 @@ describe('Document', function() {
                 }
             }
 
-            var user = User.create();
+            var user = User.create(database);
 
             expect(user.collectionName()).to.be.equal('sheeple');
             expect(User.collectionName()).to.be.equal('sheeple');
@@ -339,8 +339,8 @@ describe('Document', function() {
         it('should allow reference types', function(done) {
 
             class ReferenceeModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.str = String;
                 }
 
@@ -350,8 +350,8 @@ describe('Document', function() {
             }
 
             class ReferencerModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.ref = ReferenceeModel;
                     this.num = { type: Number };
                 }
@@ -361,8 +361,8 @@ describe('Document', function() {
                 }
             }
 
-            var data = ReferencerModel.create();
-            data.ref = ReferenceeModel.create();
+            var data = ReferencerModel.create(database);
+            data.ref = ReferenceeModel.create(database);
             data.ref.str = 'some data';
             data.num = 1;
 
@@ -371,7 +371,7 @@ describe('Document', function() {
                 return data.save();
             }).then(function() {
                 validateId(data);
-                return ReferencerModel.findOne({ num: 1 });
+                return ReferencerModel.findOne(database, { num: 1 });
             }).then(function(d) {
                 validateId(d);
                 validateId(d.ref);
@@ -383,8 +383,8 @@ describe('Document', function() {
         it('should allow array of references', function(done) {
 
             class ReferenceeModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ str: { type: String } });
                 }
 
@@ -394,8 +394,8 @@ describe('Document', function() {
             }
 
             class ReferencerModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.refs = [ReferenceeModel];
                     this.num = Number;
                 }
@@ -405,9 +405,9 @@ describe('Document', function() {
                 }
             }
 
-            var data = ReferencerModel.create();
-            data.refs.push(ReferenceeModel.create());
-            data.refs.push(ReferenceeModel.create());
+            var data = ReferencerModel.create(database);
+            data.refs.push(ReferenceeModel.create(database));
+            data.refs.push(ReferenceeModel.create(database));
             data.refs[0].str = 'string1';
             data.refs[1].str = 'string2';
             data.num = 1;
@@ -420,7 +420,7 @@ describe('Document', function() {
                 return data.save();
             }).then(function() {
                 validateId(data);
-                return ReferencerModel.findOne({ num: 1 });
+                return ReferencerModel.findOne(database, { num: 1 });
             }).then(function(d) {
                 validateId(d);
                 validateId(d.refs[0]);
@@ -434,8 +434,8 @@ describe('Document', function() {
 
         it('should allow references to be saved using the object or its id', function(done) {
             class ReferenceeModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.str = String;
                 }
 
@@ -445,8 +445,8 @@ describe('Document', function() {
             }
 
             class ReferencerModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.ref1 = ReferenceeModel;
                     this.ref2 = ReferenceeModel;
                     this.num = { type: Number };
@@ -457,9 +457,9 @@ describe('Document', function() {
                 }
             }
 
-            var data = ReferencerModel.create();
-            data.ref1 = ReferenceeModel.create();
-            var ref2 = ReferenceeModel.create();
+            var data = ReferencerModel.create(database);
+            data.ref1 = ReferenceeModel.create(database);
+            var ref2 = ReferenceeModel.create(database);
             data.ref1.str = 'string1';
             ref2.str = 'string2';
             data.num = 1;
@@ -475,7 +475,7 @@ describe('Document', function() {
                 data.ref2 = ref2._id;
                 return data.save();
             }).then(function() {
-                return ReferencerModel.findOne({num: 1});
+                return ReferencerModel.findOne(database, {num: 1});
             }).then(function(d) {
                 validateId(d.ref1);
                 validateId(d.ref2);
@@ -486,8 +486,8 @@ describe('Document', function() {
 
         it('should allow array of references to be saved using the object or its id', function(done) {
             class ReferenceeModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ str: { type: String } });
                 }
 
@@ -497,8 +497,8 @@ describe('Document', function() {
             }
 
             class ReferencerModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.refs = [ReferenceeModel];
                     this.num = Number;
                 }
@@ -508,9 +508,9 @@ describe('Document', function() {
                 }
             }
 
-            var data = ReferencerModel.create();
-            data.refs.push(ReferenceeModel.create());
-            var ref2 = ReferenceeModel.create();
+            var data = ReferencerModel.create(database);
+            data.refs.push(ReferenceeModel.create(database));
+            var ref2 = ReferenceeModel.create(database);
             data.refs[0].str = 'string1';
             ref2.str = 'string2';
             data.num = 1;
@@ -526,7 +526,7 @@ describe('Document', function() {
                 data.refs.push(ref2._id);
                 return data.save();
             }).then(function() {
-                return ReferencerModel.findOne({num: 1});
+                return ReferencerModel.findOne(database, {num: 1});
             }).then(function(d) {
                 validateId(d.refs[0]);
                 validateId(d.refs[1]);
@@ -537,16 +537,16 @@ describe('Document', function() {
         it('should allow circular references', function(done) {
 
             class Employee extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.boss = Boss;
                 }
             }
 
             class Boss extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.salary = Number;
                     this.employees = [Employee];
                 }
@@ -556,10 +556,10 @@ describe('Document', function() {
                 }
             }
 
-            var employee = Employee.create();
+            var employee = Employee.create(database);
             employee.name = 'Scott';
 
-            var boss = Boss.create();
+            var boss = Boss.create(database);
             boss.salary = 10000000;
 
             employee.boss = boss;
@@ -580,7 +580,7 @@ describe('Document', function() {
                 validateId(boss.employees[0]);
                 validateId(boss.employees[0].boss);
 
-                return Boss.findOne({ salary: 10000000 });
+                return Boss.findOne(database, { salary: 10000000 });
             }).then(function(b) {
                 // If we had an issue with an infinite loop
                 // of loading circular dependencies then the
@@ -603,13 +603,13 @@ describe('Document', function() {
         it('should allow string types', function(done) {
 
             class StringModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ str: { type: String } });
                 }
             }
 
-            var data = StringModel.create();
+            var data = StringModel.create(database);
             data.str = 'hello';
 
             data.save().then(function() {
@@ -621,8 +621,8 @@ describe('Document', function() {
         it('should allow number types', function(done) {
 
             class NumberModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ num: { type: Number } });
                 }
 
@@ -631,7 +631,7 @@ describe('Document', function() {
                 }
             }
 
-            var data = NumberModel.create();
+            var data = NumberModel.create(database);
             data.num = 26;
 
             data.save().then(function() {
@@ -643,13 +643,13 @@ describe('Document', function() {
         it('should allow boolean types', function(done) {
 
             class BooleanModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ bool: { type: Boolean } });
                 }
             }
 
-            var data = BooleanModel.create();
+            var data = BooleanModel.create(database);
             data.bool = true;
 
             data.save().then(function() {
@@ -661,13 +661,13 @@ describe('Document', function() {
         it('should allow date types', function(done) {
 
             class DateModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ date: { type: Date } });
                 }
             }
 
-            var data = DateModel.create();
+            var data = DateModel.create(database);
             var date = new Date();
             data.date = date;
 
@@ -680,13 +680,13 @@ describe('Document', function() {
         it('should allow object types', function(done) {
 
             class ObjectModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ obj: { type: Object } });
                 }
             }
 
-            var data = ObjectModel.create();
+            var data = ObjectModel.create(database);
             data.obj = { hi: 'bye'};
 
             data.save().then(function() {
@@ -699,13 +699,13 @@ describe('Document', function() {
         it('should allow buffer types', function(done) {
 
             class BufferModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ buf: { type: Buffer } });
                 }
             }
 
-            var data = BufferModel.create();
+            var data = BufferModel.create(database);
             data.buf = new Buffer('hello');
 
             data.save().then(function() {
@@ -717,13 +717,13 @@ describe('Document', function() {
         it('should allow array types', function(done) {
 
             class ArrayModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ arr: { type: Array } });
                 }
             }
 
-            var data = ArrayModel.create();
+            var data = ArrayModel.create(database);
             data.arr = [1, 'number', true];
 
             data.save().then(function() {
@@ -738,13 +738,13 @@ describe('Document', function() {
         it('should allow typed-array types', function(done) {
 
             class ArrayModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ arr: { type: [String] } });
                 }
             }
 
-            var data = ArrayModel.create();
+            var data = ArrayModel.create(database);
             data.arr = ['1', '2', '3'];
 
             data.save().then(function() {
@@ -759,8 +759,8 @@ describe('Document', function() {
         it('should reject objects containing values with different types', function(done) {
 
             class NumberModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ num: { type: Number } });
                 }
 
@@ -769,7 +769,7 @@ describe('Document', function() {
                 }
             }
 
-            var data = NumberModel.create();
+            var data = NumberModel.create(database);
             data.num = '1';
 
             data.save().then(function() {
@@ -782,13 +782,13 @@ describe('Document', function() {
         it('should reject typed-arrays containing different types', function(done) {
 
             class ArrayModel extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.schema({ arr: { type: [String] } });
                 }
             }
 
-            var data = ArrayModel.create();
+            var data = ArrayModel.create(database);
             data.arr = [1, 2, 3];
 
             data.save().then(function() {
@@ -802,7 +802,7 @@ describe('Document', function() {
     describe('defaults', function() {
         it('should assign default value if unassigned', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
 
             data.save().then(function() {
                 validateId(data);
@@ -812,7 +812,7 @@ describe('Document', function() {
 
         it('should assign default value via function if unassigned', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
 
             data.save().then(function() {
                 validateId(data);
@@ -823,8 +823,8 @@ describe('Document', function() {
         it('should be undefined if unassigned and no default is given', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.age = Number;
                 }
@@ -834,13 +834,13 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Scott'
             });
 
             person.save().then(function() {
                 validateId(person);
-                return Person.findOne({name: 'Scott'});
+                return Person.findOne(database, {name: 'Scott'});
             }).then(function(p) {
                 validateId(p);
                 expect(p.name).to.be.equal('Scott');
@@ -852,7 +852,7 @@ describe('Document', function() {
     describe('choices', function() {
         it('should accept value specified in choices', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.source = 'wired';
 
             data.save().then(function() {
@@ -863,7 +863,7 @@ describe('Document', function() {
 
         it('should reject values not specified in choices', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.source = 'google';
 
             data.save().then(function() {
@@ -877,7 +877,7 @@ describe('Document', function() {
     describe('min', function() {
         it('should accept value > min', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.item = 1;
 
             data.save().then(function() {
@@ -888,7 +888,7 @@ describe('Document', function() {
 
         it('should accept value == min', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.item = 0;
 
             data.save().then(function() {
@@ -899,7 +899,7 @@ describe('Document', function() {
 
         it('should reject value < min', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.item = -1;
 
             data.save().then(function() {
@@ -913,7 +913,7 @@ describe('Document', function() {
     describe('max', function() {
         it('should accept value < max', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.item = 99;
 
             data.save().then(function() {
@@ -924,7 +924,7 @@ describe('Document', function() {
 
         it('should accept value == max', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.item = 100;
 
             data.save().then(function() {
@@ -935,7 +935,7 @@ describe('Document', function() {
 
         it('should reject value > max', function(done) {
 
-            var data = Data.create();
+            var data = Data.create(database);
             data.item = 101;
 
             data.save().then(function() {
@@ -950,8 +950,8 @@ describe('Document', function() {
         it('should accept value matching regex', function(done) {
 
             class Product extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.cost = {
                         type: String,
@@ -960,7 +960,7 @@ describe('Document', function() {
                 }
             }
 
-            var product = Product.create();
+            var product = Product.create(database);
             product.name = 'Dark Roast Coffee';
             product.cost = '$1.39';
 
@@ -974,8 +974,8 @@ describe('Document', function() {
         it('should reject value not matching regex', function(done) {
 
             class Product extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.cost = {
                         type: String,
@@ -984,7 +984,7 @@ describe('Document', function() {
                 }
             }
 
-            var product = Product.create();
+            var product = Product.create(database);
             product.name = 'Light Roast Coffee';
             product.cost = '$1..39';
 
@@ -1000,8 +1000,8 @@ describe('Document', function() {
         it('should accept value that passes custom validator', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1016,7 +1016,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Scott'
             });
 
@@ -1029,8 +1029,8 @@ describe('Document', function() {
         it('should reject value that fails custom validator', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1045,7 +1045,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Matt'
             });
 
@@ -1061,8 +1061,8 @@ describe('Document', function() {
         it('should ensure timestamp dates are converted to Date objects', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.birthday = Date;
                 }
@@ -1074,7 +1074,7 @@ describe('Document', function() {
 
             var now = new Date();
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 birthday: now
             });
 
@@ -1087,8 +1087,8 @@ describe('Document', function() {
         it('should ensure date strings are converted to Date objects', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.birthday = Date;
                     this.graduationDate = Date;
                     this.weddingDate = Date;
@@ -1103,7 +1103,7 @@ describe('Document', function() {
             var graduationDate = new Date(2016, 1, 17, 0, 0, 0, 0);
             var weddingDate = new Date(2016, 1, 17, 0, 0, 0, 0);
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 birthday: '2016-02-17T05:06:08+00:00',
                 graduationDate: 'February 17, 2016',
                 weddingDate: '2016/02/17'
@@ -1122,8 +1122,8 @@ describe('Document', function() {
         it('should accept empty value that is not reqired', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1136,7 +1136,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: ''
             });
 
@@ -1149,8 +1149,8 @@ describe('Document', function() {
         it('should accept value that is not undefined', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1163,7 +1163,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Scott'
             });
 
@@ -1176,8 +1176,8 @@ describe('Document', function() {
         it('should accept an empty value if default is specified', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1191,7 +1191,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create();
+            var person = Person.create(database);
 
             person.save().then(function() {
                 validateId(person);
@@ -1202,8 +1202,8 @@ describe('Document', function() {
         it('should accept boolean value', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.isSingle = {
                         type: Boolean,
@@ -1220,7 +1220,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 isMerried: true,
                 isSingle: false
             });
@@ -1235,8 +1235,8 @@ describe('Document', function() {
         it('should accept date value', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.birthDate = {
                         type: Date,
@@ -1251,7 +1251,7 @@ describe('Document', function() {
 
             var myBirthDate = new Date();
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 birthDate: myBirthDate
             });
 
@@ -1264,8 +1264,8 @@ describe('Document', function() {
         it('should accept any number value', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.age = {
                         type: Number,
@@ -1282,7 +1282,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 age: 21,
                 level: 0
             });
@@ -1297,8 +1297,8 @@ describe('Document', function() {
         it('should reject value that is undefined', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1311,7 +1311,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create();
+            var person = Person.create(database);
 
             person.save().then(function() {
                 fail(null, Error, 'Expected error, but got none.');
@@ -1323,8 +1323,8 @@ describe('Document', function() {
         it('should reject value if specified default empty value', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1338,7 +1338,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create();
+            var person = Person.create(database);
 
             person.save().then(function() {
                 fail(null, Error, 'Expected error, but got none.');
@@ -1350,8 +1350,8 @@ describe('Document', function() {
         it('should reject value that is null', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: Object,
@@ -1364,7 +1364,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: null
             });
 
@@ -1378,8 +1378,8 @@ describe('Document', function() {
         it('should reject value that is an empty array', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.names = {
                         type: Array,
@@ -1392,7 +1392,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 names: []
             });
 
@@ -1406,8 +1406,8 @@ describe('Document', function() {
         it('should reject value that is an empty string', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = {
                         type: String,
@@ -1420,7 +1420,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: ''
             });
 
@@ -1434,8 +1434,8 @@ describe('Document', function() {
         it('should reject value that is an empty object', function(done) {
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.names = {
                         type: Object,
@@ -1448,7 +1448,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 names: {}
             });
 
@@ -1472,8 +1472,8 @@ describe('Document', function() {
             var postDeleteCalled = false;
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                 }
 
                 static collectionName() {
@@ -1505,7 +1505,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create();
+            var person = Person.create(database);
 
             person.save().then(function() {
                 validateId(person);
@@ -1533,8 +1533,8 @@ describe('Document', function() {
     describe('serialize', function() {
         it('should serialize data to JSON', function(done) {
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = String;
                     this.age = Number;
@@ -1551,7 +1551,7 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Scott',
                 age: 28,
                 isAlive: true,
@@ -1580,8 +1580,8 @@ describe('Document', function() {
 
         it('should serialize data to JSON', function(done) {
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = String;
                     this.children = [Person];
@@ -1596,19 +1596,19 @@ describe('Document', function() {
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'Scott'
             });
 
-            var spouse = Person.create({
+            var spouse = Person.create(database, {
                 name: 'Jane'
             });
 
-            var kid1 = Person.create({
+            var kid1 = Person.create(database, {
                 name: 'Billy'
             });
 
-            var kid2 = Person.create({
+            var kid2 = Person.create(database, {
                 name: 'Timmy'
             });
 
