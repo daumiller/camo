@@ -83,8 +83,8 @@ All models must inherit from the `Document` class, which handles much of the int
 var Document = require('camo').Document;
 
 class Company extends Document {
-    constructor() {
-        super();
+    constructor(db) {
+        super(db);
 
         this.name = String;
         this.valuation = {
@@ -170,8 +170,8 @@ To reference another document, just use its class name as the type.
 
 ```javascript
 class Dog extends Document {
-    constructor() {
-        super();
+    constructor(db) {
+        super(db);
 
         this.name = String;
         this.breed = String;
@@ -179,8 +179,8 @@ class Dog extends Document {
 }
 
 class Person extends Document {
-    constructor() {
-        super();
+    constructor(db) {
+        super(db);
 
         this.pet = Dog;
         this.name = String;
@@ -201,8 +201,8 @@ var Document = require('camo').Document;
 var EmbeddedDocument = require('camo').EmbeddedDocument;
 
 class Money extends EmbeddedDocument {
-    constructor() {
-        super();
+    constructor(db) {
+        super(db);
 
         this.value = {
             type: Number,
@@ -217,16 +217,16 @@ class Money extends EmbeddedDocument {
 }
 
 class Wallet extends Document {
-    constructor() {
-        super();
+    constructor(db) {
+        super(db);
         this.contents = [Money];
     }
 }
 
-var wallet = Wallet.create();
-wallet.contents.push(Money.create());
+var wallet = Wallet.create(database);
+wallet.contents.push(Money.create(database));
 wallet.contents[0].value = 5;
-wallet.contents.push(Money.create());
+wallet.contents.push(Money.create(database));
 wallet.contents[1].value = 100;
 
 wallet.save().then(function() {
@@ -238,7 +238,7 @@ wallet.save().then(function() {
 To create a new instance of our document, we need to use the `.create()` method, which handles all of the construction for us.
 
 ```javascript
-var lassie = Dog.create({
+var lassie = Dog.create(database, {
     name: 'Lassie',
     breed: 'Collie'
 });
@@ -252,7 +252,7 @@ Once a document is saved, it will automatically be assigned a unique identifier 
 
 If you specified a default value (or function) for a schema variable, that value will be assigned on creation of the object.
 
-An alternative to `.save()` is `.findOneAndUpdate(query, update, options)`. This static method will find and update (or insert) a document in one atomic operation (atomicity is guaranteed in MongoDB only). Using the `{upsert: true}` option will return a new document if one is not found with the given query.
+An alternative to `.save()` is `.findOneAndUpdate(database, query, update, options)`. This static method will find and update (or insert) a document in one atomic operation (atomicity is guaranteed in MongoDB only). Using the `{upsert: true}` option will return a new document if one is not found with the given query.
 
 ### Loading
 Both the find and delete methods following closely (but not always exactly) to the MongoDB API, so it should feel fairly familiar.
@@ -261,13 +261,13 @@ If querying an object by `id`, you _must_ use `_id` and **not** `id`.
 
 To retrieve an object, you have a few methods available to you.
 
-- `.findOne(query, options)` (static method)
-- `.find(query, options)` (static method)
+- `.findOne(database, query, options)` (static method)
+- `.find(database, query, options)` (static method)
 
 The `.findOne()` method will return the first document found, even if multiple documents match the query. `.find()` will return all documents matching the query. Each should be called as static methods on the document type you want to load.
 
 ```javascript
-Dog.findOne({ name: 'Lassie' }).then(function(l) {
+Dog.findOne(database, { name: 'Lassie' }).then(function(l) {
 	console.log('Got Lassie!');
 	console.log('Her unique ID is', l._id);
 });
@@ -276,34 +276,34 @@ Dog.findOne({ name: 'Lassie' }).then(function(l) {
 `.findOne()` currently accepts the following option:
 
 - `populate`: Boolean value to load all or no references. Pass an array of field names to only populate the specified references
-  - `Person.findOne({name: 'Billy'}, {populate: true})` populates all references in `Person` object
-  - `Person.findOne({name: 'Billy'}, {populate: ['address', 'spouse']})` populates only 'address' and 'spouse' in `Person` object
+  - `Person.findOne(database, {name: 'Billy'}, {populate: true})` populates all references in `Person` object
+  - `Person.findOne(database, {name: 'Billy'}, {populate: ['address', 'spouse']})` populates only 'address' and 'spouse' in `Person` object
 
 `.find()` currently accepts the following options:
 
 - `populate`: Boolean value to load all or no references. Pass an array of field names to only populate the specified references
-  - `Person.find({lastName: 'Smith'}, {populate: true})` populates all references in `Person` object
-  - `Person.find({lastName: 'Smith'}, {populate: ['address', 'spouse']})` populates only 'address' and 'spouse' in `Person` object
+  - `Person.find(database, {lastName: 'Smith'}, {populate: true})` populates all references in `Person` object
+  - `Person.find(database, {lastName: 'Smith'}, {populate: ['address', 'spouse']})` populates only 'address' and 'spouse' in `Person` object
 - `sort`: Sort the documents by the given field(s)
-  - `Person.find({}, {sort: '-age'})` sorts by age in descending order
-  - `Person.find({}, {sort: ['age', 'name']})` sorts by ascending age and then name, alphabetically
+  - `Person.find(database, {}, {sort: '-age'})` sorts by age in descending order
+  - `Person.find(database, {}, {sort: ['age', 'name']})` sorts by ascending age and then name, alphabetically
 - `limit`: Limits the number of documents returned
-  - `Person.find({}, {limit: 5})` returns a maximum of 5 `Person` objects
+  - `Person.find(database, {}, {limit: 5})` returns a maximum of 5 `Person` objects
 - `skip`: Skips the given number of documents and returns the rest
-  - `Person.find({}, {skip: 5})` skips the first 5 `Person` objects and returns all others
+  - `Person.find(database, {}, {skip: 5})` skips the first 5 `Person` objects and returns all others
 
 ### Deleting
-To remove documents fromt the database, use one of the following:
+To remove documents from the database, use one of the following:
 
 - `.delete()`
-- `.deleteOne(query, options)` (static method)
-- `.deleteMany(query, options)` (static method)
-- `.findOneAndDelete(query, options)` (static method)
+- `.deleteOne(database, query, options)` (static method)
+- `.deleteMany(database, query, options)` (static method)
+- `.findOneAndDelete(database, query, options)` (static method)
 
 The `.delete()` method should only be used on an instantiated document with a valid `id`. The other three methods should be used on the class of the document(s) you want to delete.
 
 ```javascript
-Dog.deleteMany({ breed: 'Collie' }).then(function(numDeleted) {
+Dog.deleteMany(database, { breed: 'Collie' }).then(function(numDeleted) {
 	console.log('Deleted', numDeleted, 'Collies from the database.');
 });
 ```
@@ -312,7 +312,7 @@ Dog.deleteMany({ breed: 'Collie' }).then(function(numDeleted) {
 To get the number of matching documents for a query without actually retrieving all of the data, use the `.count()` method.
 
 ```javascript
-Dog.count({ breed: 'Collie' }).then(function(count) {
+Dog.count(database, { breed: 'Collie' }).then(function(count) {
 	console.log('Found', count, 'Collies.');
 });
 ```
@@ -334,8 +334,8 @@ In order to create a hook, you must override a class method. The hooks currently
 Here is an example of using a hook (pre-delete, in this case):
 ```javascript
 class Company extends Document {
-    constructor() {
-        super();
+    constructor(db) {
+        super(db);
 
         this.employees = [Person]
     }
@@ -364,8 +364,6 @@ The code above shows a pre-delete hook that deletes all the employees of the com
 **Note**: The `.preDelete()` and `.postDelete()` hooks are _only_ called when calling `.delete()` on a Document instance. Calling `.deleteOne()` or `.deleteMany()` will **not** trigger the hook methods.
 
 ### Misc.
-- `camo.getClient()`: Retrieves the Camo database client
-- `camo.getClient().driver()`: Retrieves the underlying database driver (`MongoClient` or a map of NeDB collections)
 - `Document.toJSON()`: Serializes the given document to just the data, which includes nested and referenced data
 
 ## Transpiler Support
