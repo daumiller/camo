@@ -3,8 +3,8 @@
 var Document = require('../index').Document;
 
 class Data extends Document {
-	constructor() {
-        super();
+	constructor(DB) {
+        super(DB);
 
         this.schema({
             number: {

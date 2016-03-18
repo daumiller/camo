@@ -94,21 +94,21 @@ describe('NeDbClient', function() {
     describe('id', function() {
         it('should allow custom _id values', function(done) {
             class School extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.name = String;
                 }
             }
 
-            var school = School.create();
+            var school = School.create(database);
             school._id = '1234567890abcdef';
             school.name = 'South Park Elementary';
 
             school.save().then(function() {
                 validateId(school);
                 expect(school._id).to.be.equal('1234567890abcdef');
-                return School.findOne();
+                return School.findOne(database);
             }).then(function(s) {
                 validateId(s);
                 expect(s._id).to.be.equal('1234567890abcdef');
@@ -119,8 +119,8 @@ describe('NeDbClient', function() {
     describe('indexes', function() {
         it('should reject documents with duplicate values in unique-indexed fields', function(done) {
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.schema({
                         name: String,
@@ -132,11 +132,11 @@ describe('NeDbClient', function() {
                 }
             }
 
-            var user1 = User.create();
+            var user1 = User.create(database);
             user1.name = 'Bill';
             user1.email = 'billy@example.com';
 
-            var user2 = User.create();
+            var user2 = User.create(database);
             user1.name = 'Billy';
             user2.email = 'billy@example.com';
 
@@ -149,8 +149,8 @@ describe('NeDbClient', function() {
 
         it('should accept documents with duplicate values in non-unique-indexed fields', function(done) {
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.schema({
                         name: String,
@@ -162,11 +162,11 @@ describe('NeDbClient', function() {
                 }
             }
 
-            var user1 = User.create();
+            var user1 = User.create(database);
             user1.name = 'Bill';
             user1.email = 'billy@example.com';
 
-            var user2 = User.create();
+            var user2 = User.create(database);
             user1.name = 'Billy';
             user2.email = 'billy@example.com';
 

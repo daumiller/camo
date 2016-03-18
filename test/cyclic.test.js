@@ -38,9 +38,9 @@ describe('Cyclic', function() {
 
     describe('schema', function() {
         it('should allow cyclic dependencies', function(done) {
-            var f = Foo.create();
+            var f = Foo.create(database);
             f.num = 26;
-            var b = Bar.create();
+            var b = Bar.create(database);
             b.num = 99;
 
             f.save().then(function(foo) {
@@ -50,13 +50,13 @@ describe('Cyclic', function() {
                 f.bar = b;
                 return f.save();
             }).then(function(foo) {
-                return Foo.findOne({ num: 26 });
+                return Foo.findOne(database, { num: 26 });
             }).then(function(foo) {
                 validateId(foo);
                 validateId(foo.bar);
                 expect(foo.num).to.be.equal(26);
                 expect(foo.bar.num).to.be.equal(99);
-                return Bar.findOne({ num: 99 });
+                return Bar.findOne(database, { num: 99 });
             }).then(function(bar) {
                 validateId(bar);
                 validateId(bar.foo);

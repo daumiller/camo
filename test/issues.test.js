@@ -48,23 +48,23 @@ describe('Issues', function() {
              */
 
             class Eye extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.color = String;
                 }
             }
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.eyes = [Eye];
                 }
             }
 
-            var user1 = User.create();
-            var user2 = User.create();
-            var eye1 = Eye.create({color: 'blue'});
-            var eye2 = Eye.create({color: 'brown'});
+            var user1 = User.create(database);
+            var user2 = User.create(database);
+            var eye1 = Eye.create(database, {color: 'blue'});
+            var eye2 = Eye.create(database, {color: 'brown'});
 
             var id;
 
@@ -81,7 +81,7 @@ describe('Issues', function() {
                 return user2.save();
             }).then(function(u) {
                 validateId(u);
-                return User.find({});
+                return User.find(database, {});
             }).then(function(users) {
                 expect(users).to.have.length(2);
 
@@ -114,21 +114,21 @@ describe('Issues', function() {
              */
 
             class Eye extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.color = String;
                 }
             }
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.eyes = [Eye];
                 }
             }
 
-            var user = User.create();
-            var eye = Eye.create({color: 'blue'});
+            var user = User.create(database);
+            var eye = Eye.create(database, {color: 'blue'});
 
             eye.save().then(function(e) {
                 validateId(e);
@@ -136,7 +136,7 @@ describe('Issues', function() {
                 return user.save();
             }).then(function(u) {
                 validateId(u);
-                return User.find({});
+                return User.find(database, {});
             }).then(function(users) {
                 expect(users).to.have.length(1);
                 expect(users[0].eyes).to.have.length(2);
@@ -158,8 +158,8 @@ describe('Issues', function() {
              */
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.firstName = String;
                     this.lastName = String;
                 }
@@ -175,7 +175,7 @@ describe('Issues', function() {
                 }
             }
 
-            var user = User.create({
+            var user = User.create(database, {
                 fullName: 'Billy Bob'
             });
 
@@ -198,13 +198,13 @@ describe('Issues', function() {
              */
 
             class User extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                 }
             }
 
-            var user = User.create({
+            var user = User.create(database, {
                 name: 'Billy Bob'
             });
 
@@ -215,12 +215,12 @@ describe('Issues', function() {
                 expect(user._id).to.exist;
 
                 // Should NOT be able to use 'id' to query
-                return User.findOne({ id: user._id });
+                return User.findOne(database, { id: user._id });
             }).then(function(u) {
                 expect(u).to.not.exist;
 
                 // SHOULD be able to use '_id' to query
-                return User.findOne({ _id: user._id });
+                return User.findOne(database, { _id: user._id });
             }).then(function(u) {
                 //expect(u.id).to.not.exist;
                 expect(u).to.exist;
@@ -240,14 +240,14 @@ describe('Issues', function() {
 
         it('should validate Array types properly', function(done) {
             class Foo extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.bar = Array;
                 }
             }
 
-            var foo = Foo.create({bar: [1, 2, 3]});
+            var foo = Foo.create(database, {bar: [1, 2, 3]});
 
             foo.save().then(function(f) {
                 expect(f.bar).to.have.length(3);
@@ -267,14 +267,14 @@ describe('Issues', function() {
         it('should validate [] types properly', function(done) {
 
             class Foo extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.bar = [];
                 }
             }
 
-            var foo = Foo.create({bar: [1, 2, 3]});
+            var foo = Foo.create(database, {bar: [1, 2, 3]});
 
             foo.save().then(function(f) {
                 expect(f.bar).to.have.length(3);
@@ -307,8 +307,8 @@ describe('Issues', function() {
              */
 
             class Contact extends EmbeddedDocument {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.email = String;
                     this.phone = String;
@@ -316,14 +316,14 @@ describe('Issues', function() {
             }
 
             class Person extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
                     this.name = String;
                     this.contact = Contact;
                 }
             }
 
-            var person = Person.create({
+            var person = Person.create(database, {
                 name: 'John Doe',
                 contact: {
                     email: 'john@doe.info',
@@ -332,7 +332,7 @@ describe('Issues', function() {
             });
 
             person.save().then(function(person) {
-                return Person.findOneAndUpdate({_id: person._id}, {name: 'John Derp', 'contact.phone': '0123456789'});
+                return Person.findOneAndUpdate(database, {_id: person._id}, {name: 'John Derp', 'contact.phone': '0123456789'});
             }).then(function(person) {
                 expect(person.name).to.be.equal('John Derp');
                 expect(person.contact.email).to.be.equal('john@doe.info');
@@ -352,8 +352,8 @@ describe('Issues', function() {
              */
 
             class Foo extends Document {
-                constructor() {
-                    super();
+                constructor(DB) {
+                    super(DB);
 
                     this.bar = String;
                 }
@@ -363,7 +363,7 @@ describe('Issues', function() {
                 }
             }
 
-            Foo.create({bar: 'bar'}).save().then(function(foo) {
+            Foo.create(database, {bar: 'bar'}).save().then(function(foo) {
                 expect.fail(null, Error, 'Expected error, but got none.');
             }).catch(function(error) {
                 expect(error).to.be.equal('DO NOT SAVE');

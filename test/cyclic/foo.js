@@ -4,8 +4,8 @@ var Document = require('../../index').Document;
 var Bar = require('./bar');
 
 class Foo extends Document {
-	constructor() {
-		super();
+	constructor(DB) {
+		super(DB);
 
 		this.bar = Bar;
 		this.num = Number;
